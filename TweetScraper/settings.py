@@ -18,6 +18,10 @@ SAVE_CONVERSATION_PATH = '../Data/conversation/'
 
 DOWNLOAD_DELAY = 1.0
 
+CONCURRENT_REQUESTS = 100
+CONCURRENT_REQUESTS_PER_DOMAIN = 100
+REACTOR_THREADPOOL_MAXSIZE = 20
+
 # settings for selenium
 from shutil import which
 SELENIUM_DRIVER_NAME = 'firefox'
