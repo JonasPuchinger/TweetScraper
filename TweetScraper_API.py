@@ -1,9 +1,13 @@
+import os
 from timeit import default_timer as timer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
 from twisted.internet import defer, reactor
 
 def start_tweet_scraper(requests):
+    # Change working directory to TweetScraper to find the correct settings
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     # Init CrawlerRunner
     runner = CrawlerRunner(get_project_settings())
 
