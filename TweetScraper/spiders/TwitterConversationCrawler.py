@@ -7,7 +7,7 @@ from scrapy.shell import inspect_response
 from scrapy.core.downloader.middleware import DownloaderMiddlewareManager
 from scrapy_selenium import SeleniumRequest, SeleniumMiddleware
 
-from TweetScraper.items import Tweet, User, Conversation
+from TweetScraper.items import Tweet, User, Conversation, SingleFileConversation
 
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class TwitterConversationScraper(CrawlSpider):
     name = 'TwitterConversationScraper'
     allowed_domains = ['twitter.com']
 
-    def __init__(self, query=''):
+    def __init__(self, query='', **kwargs):
         self.url = (
             f'https://api.twitter.com/2/timeline/conversation/{query}.json?'
             f'include_profile_interstitial_type=1'
@@ -49,6 +49,7 @@ class TwitterConversationScraper(CrawlSpider):
         )
         self.query = query
         self.num_search_issued = 0
+        super().__init__(**kwargs)
 
 
     def start_requests(self):
@@ -119,17 +120,25 @@ class TwitterConversationScraper(CrawlSpider):
 
         # handle current page
         data = json.loads(response.text)
-        for item in self.parse_tweet_item(data['globalObjects']['tweets']):
-            yield item
-        for item in self.parse_user_item(data['globalObjects']['users']):
-            yield item
-        for item in self.parse_conversation_item(data['timeline']):
-            yield item
+        if hasattr(self, 'save_to_single_file') and self.save_to_single_file == 'True':
+            for item in self.parse_single_file_conversation_item(data['timeline'], data['globalObjects']['tweets'], data['globalObjects']['users']):
+                yield item
+        else:
+            for item in self.parse_tweet_item(data['globalObjects']['tweets']):
+                yield item
+            for item in self.parse_user_item(data['globalObjects']['users']):
+                yield item
+            for item in self.parse_conversation_item(data['timeline']):
+                yield item
 
         # get next page
-        cursor = data['timeline']['instructions'][0]['addEntries']['entries'][-1]['content']['operation']['cursor']['value']
-        for r in self.start_query_request(cursor=cursor):
-            yield r
+        try:
+            cursor = data['timeline']['instructions'][0]['addEntries']['entries'][-1]['content']['operation']['cursor']['value']
+            for r in self.start_query_request(cursor=cursor):
+                yield r
+        except KeyError as e:
+            pass
+        
 
 
     def parse_tweet_item(self, items):
@@ -154,3 +163,11 @@ class TwitterConversationScraper(CrawlSpider):
         conversation['id_'] = item['id']
         conversation['raw_data'] = item['instructions'][0]['addEntries']
         yield conversation
+
+    def parse_single_file_conversation_item(self, conversation, tweets, users):
+        single_file_conversation = SingleFileConversation()
+        single_file_conversation['id_'] = conversation['id']
+        single_file_conversation['raw_data'] = conversation['instructions'][0]['addEntries']
+        single_file_conversation['tweets'] = tweets
+        single_file_conversation['users'] = users
+        yield single_file_conversation
