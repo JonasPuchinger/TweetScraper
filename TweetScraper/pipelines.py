@@ -13,32 +13,20 @@ class SaveToFilePipeline(object):
 
     @classmethod
     def from_crawler(cls, crawler):
-        spider_name = getattr(crawler.spider, 'name')
         query_name = getattr(crawler.spider, 'query')
-        save_to_single_file = getattr(crawler.spider, 'save_to_single_file', None)
-        subfolder = getattr(crawler.spider, 'subfolder', None)
-        if spider_name == 'TweetScraper':
-            account_name = re.search(r'from:(\S*)\s?', query_name).group(1)
-            query_name = account_name if account_name else query_name
+        account_name = re.search(r'[to|from]:(\S*)\s?', query_name).group(1)
+        query_name = account_name if account_name else query_name
         arguments = {
-            'spider_name': spider_name,
-            'query_name': query_name,
-            'save_to_single_file': save_to_single_file,
-            'subfolder': subfolder
+            'query_name': query_name
         }
         return cls(arguments)
 
 
     def __init__(self, arguments):
-        self.spider_name = arguments['spider_name']
         self.saveTweetPath = SETTINGS['SAVE_TWEET_PATH'] + arguments['query_name']
         self.saveUserPath = SETTINGS['SAVE_USER_PATH'] + arguments['query_name']
-        self.saveConversationPath = SETTINGS['SAVE_CONVERSATION_PATH'] + arguments['subfolder']
-        if arguments['save_to_single_file'] == None:
-            mkdirs(self.saveTweetPath)
-            mkdirs(self.saveUserPath)
-        if self.spider_name == 'TwitterConversationScraper':
-            mkdirs(self.saveConversationPath)
+        mkdirs(self.saveTweetPath)
+        mkdirs(self.saveUserPath)
 
 
     def process_item(self, item, spider):
@@ -65,30 +53,6 @@ class SaveToFilePipeline(object):
             else:
                 self.save_to_file(item, savePath)
                 logger.debug("Add user:%s" %item['id_'])
-
-        elif isinstance(item, Conversation):
-            savePath = os.path.join(self.saveConversationPath, item['id_'])
-            if os.path.isfile(savePath):
-                pass # simply skip existing items
-                # logger.debug("skip conversation:%s"%item['id_'])
-                ### or you can rewrite the file, if you don't want to skip:
-                # self.save_to_file(item,savePath)
-                # logger.debug("Update conversation:%s"%item['id_'])
-            else:
-                self.save_to_file(item, savePath)
-                logger.debug("Add conversation:%s" %item['id_'])
-        
-        elif isinstance(item, SingleFileConversation):
-            savePath = os.path.join(self.saveConversationPath, item['id_'])
-            if os.path.isfile(savePath):
-                pass # simply skip existing items
-                # logger.debug("skip conversation:%s"%item['id_'])
-                ### or you can rewrite the file, if you don't want to skip:
-                # self.save_to_file(item,savePath)
-                # logger.debug("Update conversation:%s"%item['id_'])
-            else:
-                self.save_to_file(item, savePath)
-                logger.debug("Add conversation:%s" %item['id_'])
 
         else:
             logger.info("Item type is not recognized! type = %s" %type(item))

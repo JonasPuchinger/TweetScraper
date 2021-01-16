@@ -26,15 +26,7 @@ The crawled data is not as *clean* as the one obtained by the APIs, but the bene
 
 	where `query` is a list of keywords seperated by comma and quoted by `"`. The query can be any thing (keyword, hashtag, etc.) you want to search in [Twitter Search](https://twitter.com/search-home). `TweetScraper` will crawl the search results of the query and save the tweet content and user information.
 
-    	scrapy crawl TwitterConversationScraper -a query="conversation"
-
-	where `query` is a id of a tweet or a Twitter conversation, quoted by `"`. `TwitterConversationScraper` will crawl the results of the query and save the tweets and users in the conversation of the tweet, as well as references to all of them. 
-	### Options for TwitterConversationScraper
-	- `-a save_to_single_file="True"`: save all tweets, users and references found for a conversation to a single file instead of saving them separately.
-
-	- `-a subfolder="foldername"`: save to a newly created subfolder in your specified `SAVE_CONVERSATION_PATH`.
-
-3. The tweets will be saved to disk in `../Data/tweet/` in default settings and `../Data/user/` is for user data. References to conversations will be saved in `../Data/conversation` The file format is JSON. Change the `SAVE_TWEET_PATH`, `SAVE_USER_PATH` and `SAVE_CONVERSATION_PATH` in `TweetScraper/settings.py` if you want another location.
+3. The tweets will be saved to disk in `../Data/tweet/` in default settings and `../Data/user/` is for user data. References to conversations will be saved in `../Data/conversation` The file format is JSON. Change the `SAVE_TWEET_PATH` and `SAVE_USER_PATH` in `TweetScraper/settings.py` if you want another location. If you provide a query with a Twitter username in it, like so `from:username` or `to:username`, TweetScraper will generate a subfolder with that username in the specified directories.
 
 
 # Acknowledgement #
