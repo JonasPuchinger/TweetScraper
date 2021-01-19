@@ -36,7 +36,7 @@ class SaveToFilePipeline(object):
                 pass # simply skip existing items
                 # logger.debug("skip tweet:%s"%item['id_'])
                 ### or you can rewrite the file, if you don't want to skip:
-                # self.save_to_file(item,savePath)
+                self.save_to_file(item,savePath)
                 # logger.debug("Update tweet:%s"%item['id_'])
             else:
                 self.save_to_file(item,savePath)
@@ -48,7 +48,7 @@ class SaveToFilePipeline(object):
                 pass # simply skip existing items
                 # logger.debug("skip user:%s"%item['id_'])
                 ### or you can rewrite the file, if you don't want to skip:
-                # self.save_to_file(item,savePath)
+                self.save_to_file(item,savePath)
                 # logger.debug("Update user:%s"%item['id_'])
             else:
                 self.save_to_file(item, savePath)
