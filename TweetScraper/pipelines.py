@@ -1,7 +1,7 @@
 import os, logging, json, re
 from scrapy.utils.project import get_project_settings
 
-from TweetScraper.items import Tweet, User, Conversation, SingleFileConversation
+from TweetScraper.items import Tweet, User
 from TweetScraper.utils import mkdirs
 
 
