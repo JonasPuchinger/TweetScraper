@@ -14,10 +14,15 @@ class SaveToFilePipeline(object):
     @classmethod
     def from_crawler(cls, crawler):
         query_name = getattr(crawler.spider, 'query')
-        account_name = re.search(r'[to|from]:(\S*)\s?', query_name).group(1)
+        try:
+            account_name = re.search(r'[to|from]:(\S*)\s?', query_name).group(1)
+        except AttributeError:
+            account_name = None
         query_name = account_name if account_name else query_name
+        spider_name = getattr(crawler.spider, 'name')
         arguments = {
-            'query_name': query_name
+            'query_name': query_name,
+            'spider_name': spider_name
         }
         return cls(arguments)
 
@@ -25,7 +30,8 @@ class SaveToFilePipeline(object):
     def __init__(self, arguments):
         self.saveTweetPath = SETTINGS['SAVE_TWEET_PATH'] + arguments['query_name']
         self.saveUserPath = SETTINGS['SAVE_USER_PATH'] + arguments['query_name']
-        mkdirs(self.saveTweetPath)
+        if arguments['spider_name'] == 'TweetScraper':
+            mkdirs(self.saveTweetPath)
         mkdirs(self.saveUserPath)
 
 
